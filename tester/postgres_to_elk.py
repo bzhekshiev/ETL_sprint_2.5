@@ -8,7 +8,10 @@ import psycopg2
 import requests
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
+
 from config import *
+from state import JsonFileStorage, State
+from utils import current_time
 
 logger = logging.getLogger()
 
@@ -55,35 +58,34 @@ class PostgresSaver:
     def __init__(self, pg_conn: _connection):
         self.pg_conn = pg_conn
 
-    def get_person(self, timestamp):
+    def get_obj(self,obj_name, timestamp):
         cur = self.pg_conn.cursor()
         args = cur.mogrify(timestamp).decode()
         cur.execute(f'''SELECT id
-                        FROM content.person
-                        WHERE updated_at > '{args}'
-                        ORDER BY updated_at
-                        LIMIT 100; 
+                        FROM public.{obj_name}
+                        WHERE modified > '{args}'
+                        ORDER BY modified
+                        LIMIT {CHUNK_SIZE}; 
                         ''')
-        persons = cur.fetchall()
-        return persons
+        obj = cur.fetchall()
+        return [r[0] for r in obj]
 
-    def get_person_film_work(self, timestamp, persons: List):
+    def get_obj_film_work(self,obj,timestamp):
         cur = self.pg_conn.cursor()
-        SQL = '''SELECT fw.id, fw.updated_at
-                FROM content.film_work fw
-                LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id
-                WHERE fw.updated_at > %s AND pfw.person_id IN (%s)
-                ORDER BY fw.updated_at
-                LIMIT 100; '''
+        buf = "','".join(self.get_obj(f'movies_{obj}',timestamp))
+        cur.execute(f'''SELECT fw.id
+                FROM public.movies_filmwork fw
+                LEFT JOIN public.movies_{obj}filmwork pfw ON pfw.film_work_id = fw.id
+                WHERE fw.modified > '{timestamp}' AND pfw.{obj}_id IN ('{buf}')
+                ORDER BY fw.modified
+                LIMIT 100; ''')
 
-        query = cur.mogrify(SQL, (timestamp, persons))
-        res = cur.execute(query).fetchall()
-        return res
+        res = cur.fetchall()
+        return [r[0] for r in res]
+   
 
-    def get_movies(self, timestamp):
-        cur = self.pg_conn.cursor(cursor_factory=DictCursor)
-        args = cur.mogrify(timestamp).decode()
-
+    def get_movies_by_obj(self, buf, timestamp):
+        cur = self.pg_conn.cursor()
         cur.execute(f'''SELECT
                     fw.id, 
                     fw.title, 
@@ -101,28 +103,26 @@ class PostgresSaver:
                 LEFT JOIN public.movies_person p ON p.id = pfw.person_id
                 LEFT JOIN public.movies_genrefilmwork gfw ON gfw.film_work_id = fw.id
                 LEFT JOIN public.movies_genre g ON g.id = gfw.genre_id
-                WHERE fw.id IN (SELECT FW.ID
-                FROM PUBLIC.MOVIES_FILMWORK FW
-                LEFT JOIN PUBLIC.MOVIES_PERSONFILMWORK PFW ON PFW.FILM_WORK_ID = FW.ID
-                WHERE FW.MODIFIED > '{args}'
-                        AND PFW.PERSON_ID IN (SELECT ID
-                FROM PUBLIC.MOVIES_PERSON
-                WHERE MODIFIED > '{args}'
-                ORDER BY MODIFIED
-                LIMIT 100
-                )
-                ORDER BY FW.MODIFIED
-                LIMIT 100);''')
-
+                WHERE fw.id IN ('{buf}');''')
         rows = cur.fetchall()
         row_dict = [{k: v for k, v in record.items()} for record in rows]
         return row_dict
 
-    def _transform_row(self, rows: dict) -> dict:
+    def get_total_movies(self, timestamp):
+        persons_film_work = "','".join(self.get_obj_film_work('person',timestamp))
+        genre_film_work = "','".join(self.get_obj_film_work('genre',timestamp))
+        total = self.get_movies_by_obj(persons_film_work, timestamp)
+        # ТУТ ОШИБКА!!!
+        # print(len(self.get_movies_by_obj(genre_film_work, timestamp)[0]))
+        # total.append(self.get_movies_by_obj(genre_film_work, timestamp))
+        return total
+
+# 9c226388-1ab3-4160-bcf2-727cf720112a
+    def _transform_row(self, rows: list) -> dict:
         unique_movies = {}
         roles = ['actor', 'writer', 'director']
-        
         for movie in rows:
+            # print(movie)
             movie_id = movie.get('id')
             movie['created'] = str(movie.get('created'))
             movie['modified'] = str(movie.get('modified'))
@@ -179,8 +179,15 @@ if __name__ == '__main__':
         es = ESLoader('http://127.0.0.1:9200/')
         p = PostgresSaver(pg_conn)
         timestamp = '2021-01-20 13:13:21.003762+03'
-        movies = p.get_movies(timestamp)
+
+
+
+        storage = JsonFileStorage(os.path.join(BASE_DIR, 'storage.json'))
+        state = State(storage)
+        # print(state.get_state('last_work_time'))
+        # state.set_state('last_work_time',current_time())
+        movies = p.get_total_movies(timestamp)
         data = p._transform_row(movies)
+        print(len(data))
 
-        es.load_to_es(data,'test_load')
-
+        # es.load_to_es(data,'test_load')
