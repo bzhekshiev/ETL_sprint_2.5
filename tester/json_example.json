@@ -1,0 +1,143 @@
+{
+    "id": "tt0076759",
+    "genre": ["Action", "Adventure", "Fantasy", "Sci-Fi"],
+    "writers": [{
+        "id": "0b60f2f348adc2f668a9a090165e24f3d3a7cf5a",
+        "name": "George Lucas"
+    }],
+    "actors": [{
+        "id": "1",
+        "name": "Mark Hamill"
+    }, {
+        "id": "2",
+        "name": "Harrison Ford"
+    }, {
+        "id": "3",
+        "name": "Carrie Fisher"
+    }, {
+        "id": "4",
+        "name": "Peter Cushing"
+    }],
+    "actors_names": ["Mark Hamill", "Harrison Ford", "Carrie Fisher", "Peter Cushing"],
+    "writers_names": ["George Lucas"],
+    "imdb_rating": 8.6,
+    "title": "Star Wars: Episode IV - A New Hope",
+    "director": ["George Lucas"],
+    "description": "The Imperial Forces, under orders from cruel Darth Vader, hold Princess Leia hostage in their efforts to quell the rebellion against the Galactic Empire. Luke Skywalker and Han Solo, captain of the Millennium Falcon, work together with the companionable droid duo R2-D2 and C-3PO to rescue the beautiful princess, help the Rebel Alliance and restore freedom and justice to the Galaxy."
+} {
+    "id": "9c226388-1ab3-4160-bcf2-727cf720112a",
+    "title": "Star Trek IV: The Voyage Home",
+    "description": "The most acclaimed Star Trek adventure of all time with an important message. It is the 23rd century, and a mysterious alien probe is threatening Earth by evaporating the oceans and destroying the atmosphere. In their frantic attempt to save mankind, Admiral Kirk and his crew must time travel back to 1986 San Francisco where they find a world of punk, pizza and exact-change buses that are as alien to them as anything they have ever encountered in the far-off reaches of the galaxy. William Shatner and Leonard Nimoy return as Kirk and Spock, along with the entire Star Trek crew.",
+    "rating": 7.3,
+    "type": "movie",
+    "created": "2021-01-20 13:13:21.019687+03:00",
+    "modified": "2021-01-20 13:13:21.019687+03:00",
+    "person_id": "ce8a9682-1290-40bb-a191-4c9e52998693",
+    "person_name": " Nicholas Meyer",
+    "role": "writer",
+    "genre": ["Adventure", "Comedy", "Sci-Fi"],
+    "actors_names": ["James Doohan", "William Shatner", "Leonard Nimoy", "DeForest Kelley", "James Doohan", "William Shatner", "Leonard Nimoy", "DeForest Kelley", "James Doohan", "William Shatner", "Leonard Nimoy", "DeForest Kelley"],
+    "actors": [{
+        "id": "a5563bac-abeb-47a8-8bf5-780ed2ada256",
+        "name": "James Doohan"
+    }, {
+        "id": "a2598087-fac8-4c6b-a87f-ab37b09dd8f4",
+        "name": "William Shatner"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "6c87bafe-7c92-44ff-a34e-0c7c267eff62",
+        "name": "DeForest Kelley"
+    }, {
+        "id": "a5563bac-abeb-47a8-8bf5-780ed2ada256",
+        "name": "James Doohan"
+    }, {
+        "id": "a2598087-fac8-4c6b-a87f-ab37b09dd8f4",
+        "name": "William Shatner"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "6c87bafe-7c92-44ff-a34e-0c7c267eff62",
+        "name": "DeForest Kelley"
+    }, {
+        "id": "a5563bac-abeb-47a8-8bf5-780ed2ada256",
+        "name": "James Doohan"
+    }, {
+        "id": "a2598087-fac8-4c6b-a87f-ab37b09dd8f4",
+        "name": "William Shatner"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "6c87bafe-7c92-44ff-a34e-0c7c267eff62",
+        "name": "DeForest Kelley"
+    }],
+    "writers_names": ["Nicholas Meyer", "Gene Roddenberry", "Harve Bennett", "Leonard Nimoy", "Peter Krikes", "Steve Meerson", "Nicholas Meyer", "Gene Roddenberry", "Harve Bennett", "Leonard Nimoy", "Peter Krikes", "Steve Meerson", "Nicholas Meyer", "Gene Roddenberry", "Harve Bennett", "Leonard Nimoy", "Peter Krikes", "Steve Meerson"],
+    "writers": [{
+        "id": "ce8a9682-1290-40bb-a191-4c9e52998693",
+        "name": "Nicholas Meyer"
+    }, {
+        "id": "c120fe50-9025-4726-bb33-668bdb682b0b",
+        "name": "Gene Roddenberry"
+    }, {
+        "id": "a285a6ac-6b42-41ce-9fa3-8a7d6a912e4d",
+        "name": "Harve Bennett"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "4f615411-3bb9-4e30-81ab-3ba3c813aa29",
+        "name": "Peter Krikes"
+    }, {
+        "id": "47f5f8cd-35a6-41f7-9c66-4ec44842e22e",
+        "name": "Steve Meerson"
+    }, {
+        "id": "ce8a9682-1290-40bb-a191-4c9e52998693",
+        "name": "Nicholas Meyer"
+    }, {
+        "id": "c120fe50-9025-4726-bb33-668bdb682b0b",
+        "name": "Gene Roddenberry"
+    }, {
+        "id": "a285a6ac-6b42-41ce-9fa3-8a7d6a912e4d",
+        "name": "Harve Bennett"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "4f615411-3bb9-4e30-81ab-3ba3c813aa29",
+        "name": "Peter Krikes"
+    }, {
+        "id": "47f5f8cd-35a6-41f7-9c66-4ec44842e22e",
+        "name": "Steve Meerson"
+    }, {
+        "id": "ce8a9682-1290-40bb-a191-4c9e52998693",
+        "name": "Nicholas Meyer"
+    }, {
+        "id": "c120fe50-9025-4726-bb33-668bdb682b0b",
+        "name": "Gene Roddenberry"
+    }, {
+        "id": "a285a6ac-6b42-41ce-9fa3-8a7d6a912e4d",
+        "name": "Harve Bennett"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "4f615411-3bb9-4e30-81ab-3ba3c813aa29",
+        "name": "Peter Krikes"
+    }, {
+        "id": "47f5f8cd-35a6-41f7-9c66-4ec44842e22e",
+        "name": "Steve Meerson"
+    }],
+    "directors": [{
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }, {
+        "id": "80ef9452-dee2-4900-a021-2427440750d8",
+        "name": "Leonard Nimoy"
+    }]
+}

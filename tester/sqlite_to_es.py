@@ -76,7 +76,7 @@ class ETL:
                  LEFT JOIN actors a on ma.actor_id = a.id
         GROUP BY m.id
     )
-
+   
     SELECT m.id, genre, director, title, plot, imdb_rating, x.actors_ids, x.actors_names,
            CASE
             WHEN m.writers = '' THEN '[{"id": "' || m.writer || '"}]'
@@ -92,9 +92,6 @@ class ETL:
 
     def load_writers_names(self) -> dict:
         '''
-        Получаем список всех сценаристов, так как нет возможности 
-        получить их в одном запросе
-        :return: словарь всех сценаристов вида
         {
             "Writer": {"id": "writer_id", "name": "Writer"},
             ...
@@ -107,24 +104,6 @@ class ETL:
         return writers
 
     def _transform_row(self, row: dict, writers: dict) -> dict:
-        '''
-        Основная логика преобразования данных из SQLite во внутреннее 
-            представление, которое дальше будет уходить в Elasticsearch
-       Решаемы проблемы:
-        1) genre в БД указан в виде строки из одного или нескольких 
-        жанров, разделённых запятыми -> преобразовываем в список жанров.
-        2) writers из запроса в БД приходит в виде списка словарей id'шников 
-        -> обогащаем именами из полученных заранее сценаристов 
-        и добавляем к каждому id ещё и имя
-        3) actors формируем из двух полей запроса (actors_ids и actors_names) 
-        в список словарей, наподобие списка сценаристов.
-        4) для полей writers, imdb_rating, director и description меняем 
-        поля 'N/A' на None.
-
-        :param row: строка из БД
-        :param writers: текущие сценаристы
-        :return: подходящая строка для сохранения в Elasticsearch
-        '''
         movie_writers = []
         writers_set = set()
         for writer in json.loads(row['writers']):
@@ -171,17 +150,9 @@ class ETL:
             records.append(transformed_row)
 
         print(records[0])
-        self.es_loader.load_to_es(records, index_name)
+        # self.es_loader.load_to_es(records, index_name)
 
-es = ESLoader('http://127.0.0.1:9200/')
-# rows = [{'id':1, 'name':'tom'},{'id':2,'name':'tom3'},{'id':3,'name':'tom4'}]
-# es._get_es_bulk_query(rows, 'table')
-
-# es.load_to_es(rows,'table')
-
+es = ESLoader('127.0.0.1:9200')
 with conn_context('./tester/db.sqlite') as conn:
-    s = ETL(conn, es)
-    s.load('test')
-
-
-
+    e = ETL(conn,es)
+    e.load('test')
