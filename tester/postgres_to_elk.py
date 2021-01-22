@@ -180,8 +180,6 @@ if __name__ == '__main__':
         p = PostgresSaver(pg_conn)
         timestamp = '2021-01-20 13:13:21.003762+03'
         movies = p.get_movies(timestamp)
-        
-        
         data = p._transform_row(movies)
 
         es.load_to_es(data,'test_load')

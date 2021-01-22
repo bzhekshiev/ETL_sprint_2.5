@@ -43,6 +43,7 @@ coverage.xml
 # virtualenv
 venv/
 ENV/
+.vscode
 
 # intellij ide
 .idea/
