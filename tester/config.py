@@ -9,4 +9,13 @@ load_dotenv(dotenv_path)
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 CHUNK_SIZE = 100
 
+ES_PATH = 'http://127.0.0.1:9200/'
+ES_SIZE = 15
+INDEX_NAME = 'test_load'
 
+
+dsl = {'dbname': os.environ.get('DB_NAME'),
+       'user': os.environ.get('POSTGRES_USER'),
+       'password': os.environ.get('POSTGRES_PASSWORD'),
+       'host': os.environ.get('DB_HOST'),
+       'port': os.environ.get('DB_PORT')}
