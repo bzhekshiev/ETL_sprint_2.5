@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from time import sleep
 from typing import List
 from urllib.parse import urljoin
 
@@ -12,7 +13,6 @@ from psycopg2.extras import DictCursor
 from config import *
 from state import JsonFileStorage, State
 from utils import current_time
-from time import sleep
 
 logger = logging.getLogger()
 
@@ -36,11 +36,32 @@ class ESLoader:
             ])
         return prepared_query
 
-    def load_to_es(self, records: List[dict], index_name: str):
+    def _prepared_for_delete(
+            self, rows: List[str],
+            index_name: str) -> List[str]:
+        '''
+        Подготавливает bulk-запрос для удаления записей в Elasticsearch 
+        '''
+        prepared_query = []
+        for row in rows:
+            prepared_query.extend([
+                json.dumps(
+                    {'delete': {'_index': index_name, '_id': row}}),
+            ])
+        return prepared_query
+
+    def load_to_es(
+            self, records: List[dict],
+            index_name: str, method: str = None):
         '''
         Отправка запроса в ES и разбор ошибок сохранения данных
+        :method позволяет использовать другой метод подготовки данных при удалении
         '''
-        prepared_query = self._get_es_bulk_query(records, index_name)
+        if method == 'DELETE':
+            prepared_query = self._prepared_for_delete(records, index_name)
+        else:
+            prepared_query = self._get_es_bulk_query(records, index_name)
+
         str_query = '\n'.join(prepared_query) + '\n'
 
         response = requests.post(
@@ -56,9 +77,17 @@ class ESLoader:
                 if error_message:
                     logger.error(error_message)
 
-    def get_all_data(self,from_,size)->dict:
-        req = requests.get(urljoin(self.url, f'{INDEX_NAME}/_search/?sort={{created:ASC}}&size={size}&from={from_}'))
+    def get_all_data(self, from_: str, size: int) -> dict:
+        """Получить все записи из ElasticSearch
+        :size - кол-во выгружаемых записей
+        :from_ - отметка, с которой читать записи
+        """
+        req = requests.get(
+            urljoin(
+                self.url,
+                f'{INDEX_NAME}/_search/?sort={{created:ASC}}&size={size}&from={from_}'))
         return req.json()
+
 
 class PostgresSaver:
 
@@ -162,7 +191,6 @@ class PostgresSaver:
             return [r[0] for r in rows]
         return None
 
-
     def get_total_movies(self, timestamp):
         result = {'persons': None, 'genres': None}
         persons_buf = self.get_obj_film_work('person', timestamp)
@@ -180,8 +208,8 @@ class PostgresSaver:
 
         return result
 
-# 9c226388-1ab3-4160-bcf2-727cf720112a
     def _transform_row(self, rows: list) -> dict:
+        """Подготавливает данных к виду, необходимому для загрузки в Elasticsearch"""
         unique_movies = {}
         roles = ['actor', 'writer', 'director']
         if rows is not None:
@@ -246,7 +274,6 @@ if __name__ == '__main__':
         storage = JsonFileStorage(os.path.join(BASE_DIR, 'storage.json'))
         state = State(storage)
 
-        # '2021-01-20 13:13:21.003762+03'
         timestamp = state.get_state('last_work_time')
 
         loading = state.get_state('')
