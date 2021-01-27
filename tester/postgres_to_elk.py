@@ -188,6 +188,5 @@ if __name__ == '__main__':
         # state.set_state('last_work_time',current_time())
         movies = p.get_total_movies(timestamp)
         data = p._transform_row(movies)
-        print(len(data))
 
-        # es.load_to_es(data,'test_load')
+        es.load_to_es(data,'test_load')
