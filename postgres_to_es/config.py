@@ -11,7 +11,7 @@ CHUNK_SIZE = 100
 
 ES_PATH = 'http://127.0.0.1:9200/'
 ES_SIZE = 15
-INDEX_NAME = 'test_load'
+INDEX_NAME = 'movies'
 
 
 dsl = {'dbname': os.environ.get('DB_NAME'),
