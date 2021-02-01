@@ -85,7 +85,7 @@ class ESLoader:
         req = requests.get(
             urljoin(
                 self.url,
-                f'{INDEX_NAME}/_search/?sort={{created:ASC}}&size={size}&from={from_}'))
+                f'{INDEX_MOVIE}/_search/?sort={{created:ASC}}&size={size}&from={from_}'))
         return req.json()
 
 
@@ -142,6 +142,7 @@ class PostgresSaver:
                         p.id as person_id,
                         P.FIRST_NAME || ' ' || P.LAST_NAME as person_name,
                         pfw.role,
+                        g.id as genre_id,
                         g.name as genre
                     FROM public.movies_filmwork fw
                     LEFT JOIN public.movies_personfilmwork pfw ON pfw.film_work_id = fw.id
@@ -168,14 +169,14 @@ class PostgresSaver:
                     p.id as person_id,
                     P.FIRST_NAME || ' ' || P.LAST_NAME as person_name,
                     pfw.role,
+                    g.id as genre_id,
                     g.name as genre
                 FROM public.movies_filmwork fw
                 LEFT JOIN public.movies_personfilmwork pfw ON pfw.film_work_id = fw.id
                 LEFT JOIN public.movies_person p ON p.id = pfw.person_id
                 LEFT JOIN public.movies_genrefilmwork gfw ON gfw.film_work_id = fw.id
-                LEFT JOIN public.movies_genre g ON g.id = gfw.genre_id
-                WHERE fw.modified >'{timestamp}'
-                LIMIT {CHUNK_SIZE};''')
+                LEFT JOIN public.movies_genre g ON g.id = gfw.genre_id;
+                ''')
         rows = cur.fetchall()
         if rows != []:
             row_dict = [{k: v for k, v in record.items()} for record in rows]
@@ -208,6 +209,31 @@ class PostgresSaver:
 
         return result
 
+    def get_genres(self, obj_name: str) -> List[str]:
+        """Получение списка записей жанров"""
+        cur = self.pg_conn.cursor()
+        cur.execute(f'''SELECT distinct id, name
+                        FROM public.movies_genre; 
+                        ''')
+        obj = cur.fetchall()
+        res = [{'id':r[0],'name':r[1]} for r in obj]
+        if obj == []:
+            None
+        return res
+    
+    def get_persons(self, obj_name: str) -> List[str]:
+        """Получение списка записей жанров"""
+        cur = self.pg_conn.cursor()
+        cur.execute(f'''SELECT distinct id, CONCAT(last_name, first_name) as name
+                        FROM public.movies_person; 
+                        ''')
+        obj = cur.fetchall()
+        res = [{'id':r[0],'name':r[1]} for r in obj]
+        if obj == []:
+            None
+        return res
+
+
     def _transform_row(self, rows: list) -> dict:
         """Подготавливает данных к виду, необходимому для загрузки в Elasticsearch"""
         unique_movies = {}
@@ -229,7 +255,7 @@ class PostgresSaver:
 
                     if movie.get('genre'):
                         unique_movies[movie_id]['genre'].append(
-                            movie.get('genre'))
+                            {'id': movie.get('genre_id'), 'name': movie.get('genre')})
                     for role in roles:
                         if movie.get('role') == role and movie.get(
                                 'person_name') is not None:
@@ -242,8 +268,8 @@ class PostgresSaver:
 
                 else:
                     destination_record = unique_movies.get(movie_id)
-                    if movie.get('genre') is not None and movie.get('genre') not in destination_record['genre']:
-                        destination_record['genre'].append(movie.get('genre'))
+                    if movie.get('genre') is not None and {'id': movie.get('genre_id'), 'name': movie.get('genre')} not in  destination_record['genre'] :
+                        destination_record['genre'].append({'id': movie.get('genre_id'), 'name': movie.get('genre')})
                     for role in roles:
                         if movie.get('role') == role and movie.get(
                                 'person_name') is not None and movie.get(
@@ -256,17 +282,21 @@ class PostgresSaver:
                                 movie.get('person_name').strip())
 
         result = []
-
-        for val in unique_movies.values():
-            del val['person_id']
-            del val['person_name']
-            del val['role']
-            result.append(val)
+        try:
+            for val in unique_movies.values():
+                del val['person_id']
+                del val['person_name']
+                del val['role']
+                del val['genre_id']
+                result.append(val)
+        except:
+            pass
 
         return result
 
 
 if __name__ == '__main__':
+    print(dsl)
     with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
         es = ESLoader(ES_PATH)
         p = PostgresSaver(pg_conn)
@@ -279,14 +309,20 @@ if __name__ == '__main__':
         loading = state.get_state('')
         if not loading:
             state.set_state('loading', True)
-
             change_movies = p.get_changed_movies(timestamp)
             data = p._transform_row(change_movies)
-            es.load_to_es(data, INDEX_NAME)
+            es.load_to_es(data, INDEX_MOVIE)
 
             for value in p.get_total_movies(timestamp).values():
                 data = p._transform_row(value)
-                es.load_to_es(data, INDEX_NAME)
+                es.load_to_es(data, INDEX_MOVIE)
+
+            genres = p.get_genres('movies_genre')
+            es.load_to_es(genres, INDEX_GENRE)
+            pers = p.get_persons('movies_person')
+            es.load_to_es(pers, INDEX_PERSON)
+
+
 
             state.set_state('loading', False)
             state.set_state('last_work_time', current_time())
